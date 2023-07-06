@@ -46,12 +46,16 @@ module.exports = {
         try{
             let sql = await mssql.connect(config);
             if(sql.connected){
+
+
                 let results = await sql.request()
                                     .input("username",username)
                                     .execute("sp_SelectUserByUsername")
 
                 let user = results.recordset[0]
                 if(user){
+                    req.session.userId = user.user_id; 
+
                     let passwords_match = await bcrypt.compare(password,user.password)
                     passwords_match?res.json({success:true, message:"logged in successfully"}):
                     res.status(401).json({success:false, message:"wrong credentials"})
@@ -59,6 +63,8 @@ module.exports = {
                 else{
                     res.status(404).json({success:false,message:"No user Found"})
                 }
+
+               
             }
             else{
                 res.status(500).json({success:false,message:"Internal server error"})
