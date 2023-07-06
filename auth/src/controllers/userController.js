@@ -3,7 +3,7 @@ const config = require('../config/config')
 const bcrypt = require('bcrypt');
 
 const { newUserValidator } = require('../validators/newUserValidator')
-const { sendMailRegisterUser } = require('../utilis/sendMail')
+const { sendMailRegisterUser } = require('../utils/sendMail')
 
 
 module.exports = {
