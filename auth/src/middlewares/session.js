@@ -5,7 +5,7 @@ const session = require('express-session');
 // Middleware function to authorize paths using sessions
 const authorize = (req, res, next) => {
   // Check if user is authenticated
-  if (req.session.userId) {
+  if (req.session.userId && authorized) {
     // User is authenticated, proceed to the next middleware
     next();
   } else {

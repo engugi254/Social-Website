@@ -54,6 +54,8 @@ module.exports = {
                 let user = results.recordset[0]
                 if(user){
                     req.session.userId = user.user_id; 
+                    req.session.authorized = true;
+
 
                     let passwords_match = await bcrypt.compare(password,user.password)
                     passwords_match?res.json({success:true, message:"logged in successfully"}):
