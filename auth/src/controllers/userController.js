@@ -1,5 +1,4 @@
-const mssql = require('mssql')
-const config = require('../config/config')
+
 const bcrypt = require('bcrypt');
 
 const { newUserValidator } = require('../validators/newUserValidator')
@@ -16,12 +15,12 @@ module.exports = {
           console.log(value)
         let hashed_pwd = await bcrypt.hash(user.password,8)
 
-        let sql = await mssql.connect(config);
+        let pool = req.pool;
 
         try{
 
-        if(sql.connected){
-            let results = await sql.request()
+        if(pool.connected){
+            let results = await pool.request()
                                 .input("firstname",value.firstname)
                                 .input("lastname",value.lastname)
                                 .input("username",value.username)
@@ -44,11 +43,11 @@ module.exports = {
     loginUser:async(req,res)=>{
         let{ username, password } = req.body;
         try{
-            let sql = await mssql.connect(config);
-            if(sql.connected){
+            const pool = req.pool;
+            if(pool.connected){
 
 
-                let results = await sql.request()
+                let results = await pool.request()
                                     .input("username",username)
                                     .execute("sp_SelectUserByUsername")
 

@@ -1,38 +1,105 @@
 const express = require("express");
-require('dotenv').config();
-const { v4 } = require("uuid")
-const session = require('express-session');
-const authorize = require('./src/middlewares/session');
-
+require("dotenv").config();
+const session = require("express-session");
+const { v4 } = require("uuid");
 const userRoute = require('./src/routes/userRoute')
+const config = require("./src/config/config");
+const sql = require("mssql");
+const RedisStore = require("connect-redis").default
+const {createClient} = require("redis")
+const authorize = require("./src/middlewares/session")
 
 const app = express();
 app.use(express.json());
 
-app.use(session({
+
+const pool  = new sql.ConnectionPool(config)
+async function startApp() {
+  try {
+    await pool.connect();
+    console.log("App connected to database");
+
+    const redisClient =  createClient();
+    redisClient.connect()
+    console.log("Connected to Redis")
+    
+    const redisStore = new RedisStore({
+        client: redisClient,
+        prefix: ''
+    })
+
+
+const oneDay = 60 * 60 * 1000 * 24;
+app.use(
+  session({
+    store: redisStore,
     secret: process.env.SECRET,
-    saveUninitialized: false,
-    genid: ()=>v4(),
+    saveUninitialized: true,
+    genid: () => v4(),
     resave: true,
     rolling: true,
-    cookie:{
-        httpOnly: true,
-        secure: false
-    }
-}))
+    unset: 'destroy',
+    cookie: {
+      httpOnly: false,
+      secure: false, //For production, set to true (HTTPS request)
+      maxAge: oneDay,
+      domain:'localhost'
+    },
+  })
+);
 
-app.get('/',(req,res)=>{
-    res.send("Ok");
-})
 
-// Example route that requires authentication
+    app.use((req, res, next) => {req.pool = pool;next();});
+
+    app.get(
+      "/",
+      (req, res, next) => {
+        let cont = true;
+        if (cont) {
+          next();
+        } else {
+          res.send("Error");
+        }
+      },
+      (req, res) => {
+        res.send("Ok");
+      }
+    );
+
+    // Example route that requires authentication
 app.get('/protected', authorize, (req, res) => {
     // Authorized route handler logic
     res.send('You have access to the protected route!');
   });
 
+  app.get('/logout', (req, res)=>{
+    req.session.destroy();
+    res.send("Logout successfully")
+})
+
 app.use('/users', userRoute)
 
-const port = process.env.PORT || 4000;
+    app.use("*", (req, res, next) => {
+      const error = new Error("Route Not found");
+      next({
+        status: 404,
+        message: error.message,
+      });
+    });
 
-app.listen(port,()=>console.log(`Server on port: ${port}`))
+    app.use((error, req, res, next) => {
+      res.status(error.status).json(error.message);
+    });
+
+    const port = process.env.PORT;
+
+    app.listen(port, () => {
+      console.log(`Server is listening on ${port}`);
+    });
+  } catch (error) {
+    console.log("Error connecting to the database");
+    console.log(error);
+  }
+}
+
+startApp();
