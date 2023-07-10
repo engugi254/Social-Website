@@ -71,3 +71,19 @@ END;
 select * from followers
 
 
+CREATE TRIGGER DeletePostTrigger
+ON Post
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Delete comments associated with the deleted post
+    DELETE FROM Comments
+    WHERE post_id IN (SELECT post_id FROM DELETED);
+    
+    -- Delete likes associated with the deleted post
+    DELETE FROM Likes
+    WHERE post_id IN (SELECT post_id FROM DELETED);
+END;
+

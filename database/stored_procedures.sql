@@ -8,6 +8,16 @@ BEGIN
     VALUES (@user_id, @content, GETDATE())
 END
 
+CREATE PROCEDURE SoftDeletePost
+    @post_id INT
+AS
+BEGIN
+    UPDATE Post
+    SET isDeleted = 1
+    WHERE post_id = @post_id;
+END;
+
+
 EXEC CreatePost 2, "A fOURTH POST" 
 SELECT * FROM POST
 --Procedure to insert a user
@@ -21,6 +31,16 @@ AS
 BEGIN
     INSERT INTO Users (firstname, lastname, username, email, password)
     VALUES (@firstname, @lastname, @username, @email, @password);
+END;
+
+
+CREATE PROCEDURE SoftDeleteUser
+    @username VARCHAR(255)
+AS
+BEGIN
+    UPDATE Users
+    SET isDeleted = 1
+    WHERE username = @username;
 END;
 
 CREATE PROCEDURE sp_SelectUserByUsername
