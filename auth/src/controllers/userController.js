@@ -73,5 +73,85 @@ module.exports = {
         }catch(error){
 
         }
+    },
+    deleteUser:async(req,res)=>{
+        try {
+            const { username } = req.body;
+            const pool = req.pool;
+    
+            if (pool.connected) {
+                const result = await pool.request()
+                    .input("username", username)
+                    .execute("dbo.SoftDeleteUser");
+    
+                // Check if any rows were affected by the deletion
+                if (result.rowsAffected[0] > 0) {
+                    res.json({
+                        success: true,
+                        message: "User Account deleted successfully",
+                    });
+                } else {
+                    res.status(404).json({
+                        success: false,
+                        message: "Error deleting post",
+                    });
+                }
+            } else {
+                throw new Error("Internal Error");
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: "Failed to delete post",
+                error: error.message,
+            });
+        }
+    },
+    addProfile:async(req,res)=>{
+        let user = req.body;
+
+        let pool = req.pool;
+
+        try{
+
+        if(pool.connected){
+            let results = await pool.request()
+            .input("profile_id",user.profile_id)
+                                .input("user_id",user.user_id)
+                                .input("profile_pic_url",user.profile_pic)
+                                .input("cover_pic_url",user.cover_pic)
+                                .input("contact_no",user.contact_no)
+                                .input("address",user.address)
+                                .input("bio",user.bio)
+                                .input("relationship_status",user.relationship_status)
+                                .input("gender",user.gender)
+                                .execute("dbo.AddUserDetails")
+               
+                 console.log(results)
+                results.rowsAffected.length ? res.send({ success: true, message: 'Saved User' }) :
+                    res.send({ success: false, message: 'An error occurred' })
+
+        }
+    }catch(error){
+        res.send(error.message)
     }
+},
+showFollowers:async(req,res)=>{
+    let {id} = req.params;
+
+    let pool = req.pool;
+    if(pool.connected){
+        let results = await pool.query(`SELECT * from dbo.Followers WHERE user_id=${id}`);
+        let posts = results.recordset;
+        res.json({
+            success:true,
+            message:"Getting followers successfully",
+            results:posts
+        })
+    }else{
+        res.status(500).send("Internal server error")
+    }
+}
+
 }

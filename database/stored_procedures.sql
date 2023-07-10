@@ -128,6 +128,16 @@ BEGIN
     VALUES (@post_id, @user_id, GETDATE());
 END;
 
+CREATE PROCEDURE UnlikePost
+    @post_id INT,
+    @user_id INT
+AS
+BEGIN
+    DELETE FROM PostLike
+    WHERE post_id = @post_id AND user_id = @user_id;
+END;
+
+
 SELECT * FROM  PostLike
 SELECT * FROM Users
 

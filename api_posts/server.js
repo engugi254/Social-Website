@@ -1,19 +1,44 @@
 const express = require("express");
-require('dotenv').config();
-
-
-const router = require('./src/routes/postRoute')
+require("dotenv").config();
+const mssql = require("mssql");
+const config = require("./src/config/config");
+const postRoute = require("./src/routes/postRoute")
 
 
 const app = express();
+
 app.use(express.json());
 
-app.get('/',(req,res)=>{
-    res.send("Ok");
-})
+const pool  = new mssql.ConnectionPool(config)
 
-app.use(router)
+async function startApp() {
+  try {
+    await pool.connect();
+    console.log("App connected to database");
+    
+    app.use((req, res, next) => {
+      req.pool = pool;
+      next();
+    });
+    
+    app.use(postRoute);
+    
+    app.get("/", (req, res) => {
+      res.send("Ok");
+    });
+    
+    app.get("*", (req, res) => {
+      res.status(404).json({ message: "Page not found" });
+    });
+    
+    const port = process.env.PORT;
+    
+    app.listen(port, () => {
+      console.log(`Posts Server is running on port ${port}`);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
 
-const port = process.env.PORT || 5000;
-
-app.listen(port,()=>console.log(`Server on port: ${port}`))
+startApp();

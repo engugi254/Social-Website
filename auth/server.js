@@ -79,13 +79,6 @@ app.get('/protected', authorize, (req, res) => {
 
 app.use('/users', userRoute)
 
-    app.use("*", (req, res, next) => {
-      const error = new Error("Route Not found");
-      next({
-        status: 404,
-        message: error.message,
-      });
-    });
 
     app.use((error, req, res, next) => {
       res.status(error.status).json(error.message);
@@ -94,7 +87,7 @@ app.use('/users', userRoute)
     const port = process.env.PORT;
 
     app.listen(port, () => {
-      console.log(`Server is listening on ${port}`);
+      console.log(`Auth Server is listening on ${port}`);
     });
   } catch (error) {
     console.log("Error connecting to the database");
