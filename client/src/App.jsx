@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
+import axios from "axios";
+import RedirectedPage from "./RedirectedPage";
 
 function App() {
   const [loginUsername, setLoginUsername] = useState("");
@@ -12,6 +14,7 @@ function App() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showLogin, setShowLogin] = useState(true);
   const [error, setError] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -24,11 +27,11 @@ function App() {
     } else {
       // Perform login logic here
       console.log("Logged in successfully!");
-      // Redirect to the dashboard or another page
+      setLoggedIn(true);
     }
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
     // Perform registration validation here
@@ -46,15 +49,33 @@ function App() {
     } else if (registerPassword !== confirmPassword) {
       setError("Passwords do not match.");
     } else {
-      // Perform registration logic here
-      console.log("Registered successfully!");
-      // Show success message or redirect to login page
+      try {
+        // Send registration data to the server
+        await axios.post("http://localhost:4040/users/register", {
+          firstname: registerFirstName,
+          lastname: registerLastName,
+          username: registerUsername,
+          email: registerEmail,
+          password: registerPassword,
+          c_password: confirmPassword,
+        });
+
+        console.log("Registered successfully!");
+        setLoggedIn(true);
+      } catch (error) {
+        console.error("Error while registering:", error);
+        setError("Error while registering.");
+      }
     }
   };
 
   const handleRegisterLinkClick = () => {
     setShowLogin(false);
   };
+
+  if (loggedIn) {
+    return <RedirectedPage />;
+  }
 
   return (
     <div className="container">

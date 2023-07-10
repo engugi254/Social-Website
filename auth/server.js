@@ -9,9 +9,10 @@ const RedisStore = require("connect-redis").default
 const {createClient} = require("redis")
 const authorize = require("./src/middlewares/session")
 
+const cors = require('cors')
 const app = express();
 app.use(express.json());
-
+app.use(cors());
 
 const pool  = new sql.ConnectionPool(config)
 async function startApp() {
