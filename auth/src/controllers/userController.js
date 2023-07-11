@@ -49,15 +49,19 @@ module.exports = {
 
                 let results = await pool.request()
                                     .input("username",username)
-                                    .execute("sp_SelectUserByUsername")
+                                    .execute("dbo.sp_SelectUserByUsername")
 
                 let user = results.recordset[0]
+    
                 if(user){
-                    req.session.userId = user.user_id; 
-                    req.session.authorized = true;
-
 
                     let passwords_match = await bcrypt.compare(password,user.password)
+                    if(passwords_match){
+                    req.session.userId = user.user_id; 
+                    req.session.authorized = true;
+                }
+                    console.log(passwords_match);
+   
                     passwords_match?res.json({success:true, message:"logged in successfully"}):
                     res.status(401).json({success:false, message:"wrong credentials"})
                 }

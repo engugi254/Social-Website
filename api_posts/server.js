@@ -5,9 +5,11 @@ const config = require("./src/config/config");
 const postRoute = require("./src/routes/postRoute")
 
 
+const cors = require('cors')
 const app = express();
-
 app.use(express.json());
+app.use(cors());
+
 
 const pool  = new mssql.ConnectionPool(config)
 

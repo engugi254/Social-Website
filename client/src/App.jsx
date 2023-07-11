@@ -16,18 +16,21 @@ function App() {
   const [error, setError] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
 
-  const handleLoginSubmit = (e) => {
+  // ...
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    // Perform login validation here
+    try {
+      const response = await axios.post("http://localhost:4040/users/login", {
+        username: loginUsername,
+        password: loginPassword,
+      });
 
-    // Example validation: check if username and password are not empty
-    if (loginUsername === "" || loginPassword === "") {
-      setError("Please enter both username and password.");
-    } else {
-      // Perform login logic here
       console.log("Logged in successfully!");
       setLoggedIn(true);
+    } catch (error) {
+      console.error("Error while logging in:", error);
+      setError("Error while logging in.");
     }
   };
 
@@ -68,14 +71,17 @@ function App() {
       }
     }
   };
+  const handleLogout = () => {
+    setLoggedIn(false);
+  };
+
+  if (loggedIn) {
+    return <RedirectedPage onLogout={handleLogout} />;
+  }
 
   const handleRegisterLinkClick = () => {
     setShowLogin(false);
   };
-
-  if (loggedIn) {
-    return <RedirectedPage />;
-  }
 
   return (
     <div className="container">
