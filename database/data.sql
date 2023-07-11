@@ -45,6 +45,19 @@ CREATE TABLE Comment (
     CONSTRAINT FK_Comment_User FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
 
+CREATE TABLE Reply (
+    reply_id INT IDENTITY(1,1) PRIMARY KEY,
+    comment_id INT NOT NULL,
+    post_id INT NOT NULL,
+    user_id INT NOT NULL,
+    content VARCHAR(MAX) NOT NULL,
+    timestamp DATETIME NOT NULL,
+    isDeleted BIT DEFAULT 0,
+    CONSTRAINT FK_Reply_Comment FOREIGN KEY (comment_id) REFERENCES Comment (comment_id),
+    CONSTRAINT FK_Reply_Post FOREIGN KEY (post_id) REFERENCES Post (post_id),
+    CONSTRAINT FK_Reply_User FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
 CREATE TABLE Notification (
     notification_id INT IDENTITY(1,1) PRIMARY KEY,
     user_id INT NOT NULL,

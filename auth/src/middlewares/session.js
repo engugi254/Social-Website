@@ -1,6 +1,5 @@
 
 
-const session = require('express-session');
 
 // Middleware function to authorize paths using sessions
 const authorize = (req, res, next) => {

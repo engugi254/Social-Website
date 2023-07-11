@@ -117,6 +117,21 @@ EXEC InsertComment 2,5,"Another comment"
 SELECT * FROM Comment
 SELECT * FROM Notification
 
+CREATE PROCEDURE InsertReply
+    @commentId INT,
+    @postId INT,
+    @userId INT,
+    @content VARCHAR(MAX),
+    @timestamp DATETIME
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Reply (comment_id, post_id, user_id, content, timestamp)
+    VALUES (@commentId, @postId, @userId, @content, @timestamp);
+    
+    SELECT SCOPE_IDENTITY() AS replyId; -- Optionally, return the generated reply_id
+END
 --Procedure that inserts reply
 CREATE PROCEDURE InsertChildReply
     @post_id INT,
