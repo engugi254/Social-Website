@@ -4,10 +4,16 @@ const mssql = require("mssql");
 const config = require("./src/config/config");
 const postRoute = require("./src/routes/commentRoute")
 
-
+const cors = require('cors')
 const app = express();
 
 app.use(express.json());
+
+app.use(cors({
+  origin:'http://localhost:5173',
+  credentials:true,
+  optionsSuccessStatus:200
+}));
 
 const pool  = new mssql.ConnectionPool(config)
 

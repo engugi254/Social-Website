@@ -1,12 +1,26 @@
 --Procedure to create a new post
 CREATE PROCEDURE CreatePost
     @user_id INT,
-    @content VARCHAR(255)
+    @content VARCHAR(255),
+    @image VARCHAR(MAX)
 AS
 BEGIN
     INSERT INTO Post (user_id, content, timestamp)
     VALUES (@user_id, @content, GETDATE())
 END
+
+CREATE PROCEDURE UpdatePost
+    @post_id INT,
+    @content VARCHAR(MAX) = NULL,
+    @image VARCHAR(255) = NULL
+AS
+BEGIN
+    UPDATE Post
+    SET
+        content = ISNULL(@content, content),
+        image = ISNULL(@image, image)
+    WHERE post_id = @post_id;
+END;
 
 CREATE PROCEDURE SoftDeletePost
     @post_id INT
@@ -121,14 +135,13 @@ CREATE PROCEDURE InsertReply
     @commentId INT,
     @postId INT,
     @userId INT,
-    @content VARCHAR(MAX),
-    @timestamp DATETIME
+    @content VARCHAR(MAX)
 AS
 BEGIN
     SET NOCOUNT ON;
 
     INSERT INTO Reply (comment_id, post_id, user_id, content, timestamp)
-    VALUES (@commentId, @postId, @userId, @content, @timestamp);
+    VALUES (@commentId, @postId, @userId, @content, GETDATE());
     
     SELECT SCOPE_IDENTITY() AS replyId; -- Optionally, return the generated reply_id
 END
@@ -147,10 +160,7 @@ BEGIN
            SELECT comment_id FROM Comment WHERE comment_id = @parent_comment_id);
 END;
 
-EXEC InsertChildReply 1,3,"Reply Another Comment"
-Drop procedure InsertChildReply
-SELECT * FROM Comment
-SELECT * FROM Notification
+
 
 --Procedure for likes
 CREATE PROCEDURE InsertPostLike
@@ -238,7 +248,6 @@ END;
 
 --Procedure to Add profile of a user
 CREATE PROCEDURE AddUserDetails
-    @profile_id INT,
     @user_id INT,
     @profile_pic_url VARCHAR(255),
     @cover_pic_url VARCHAR(255),
@@ -249,8 +258,31 @@ CREATE PROCEDURE AddUserDetails
     @gender CHAR(1)
 AS
 BEGIN
-    INSERT INTO user_details (profile_id, user_id, profile_pic_url, cover_pic_url, contact_no, address, bio, relationship_status, gender)
+    INSERT INTO Profile (profile_id, user_id, profile_pic_url, cover_pic_url, contact_no, address, bio, relationship_status, gender)
     VALUES (@profile_id, @user_id, @profile_pic_url, @cover_pic_url, @contact_no, @address, @bio, @relationship_status, @gender);
+END;
+
+CREATE PROCEDURE updateProfile
+    @user_id INT,
+    @profile_pic_url VARCHAR(255),
+    @cover_pic_url VARCHAR(255),
+    @contact_no VARCHAR(20),
+    @address VARCHAR(255),
+    @bio VARCHAR(MAX),
+    @relationship_status VARCHAR(50),
+    @gender CHAR(1)
+AS
+BEGIN
+    UPDATE AddUserDetails
+    SET
+        profile_pic_url = @profile_pic_url,
+        cover_pic_url = @cover_pic_url,
+        contact_no = @contact_no,
+        address = @address,
+        bio = @bio,
+        relationship_status = @relationship_status,
+        gender = @gender
+    WHERE user_id = @user_id;
 END;
 
 --Procedure to delete the profile of a user
@@ -291,3 +323,23 @@ BEGIN
 END;
 DROP PROCEDURE GetPostLikeCount
 EXEC GetPostLikeCount 2
+
+CREATE PROCEDURE GetProfileContentByUserId
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        U.user_id,
+        U.username,
+        P.profile_pic_url,
+        PO.post_id,
+		PO.timestamp
+    FROM
+        Users U
+    LEFT JOIN Profile P ON U.user_id = P.user_id
+    LEFT JOIN Post PO ON U.user_id = PO.user_id
+	WHERE post_id IS NOT NULL
+	ORDER BY timestamp DESC
+    
+END

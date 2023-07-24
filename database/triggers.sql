@@ -1,3 +1,80 @@
+CREATE TRIGGER trgAfterInsertComment
+ON Comments
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @postId INT, @commentUserId INT, @postUserId INT;
+
+    SELECT @postId = post_id, @commentUserId = user_id
+    FROM inserted;
+
+    -- Get the user ID of the post owner
+    SELECT @postUserId = user_id
+    FROM Posts
+    WHERE post_id = @postId;
+
+    -- Insert a new row into the Notifications table for the comment
+    INSERT INTO Notifications (user_id, type, source_user_id, post_id)
+    VALUES (@postUserId, 'comment', @commentUserId, @postId);
+END;
+
+CREATE TRIGGER trg_PostLike
+ON PostLike
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @postId INT;
+    DECLARE @likedByUserId INT;
+    
+    SELECT @postId = post_id, @likedByUserId = user_id
+    FROM inserted;
+    
+    INSERT INTO Notifications (user_id, type, source_user_id, post_id)
+    VALUES (@postId, 'like', @likedByUserId, @postId);
+END;
+
+CREATE TRIGGER trg_Followers
+ON Followers
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @followerUserId INT;
+    DECLARE @followedUserId INT;
+    
+    SELECT @followerUserId = follower_user_id, @followedUserId = followed_user_id
+    FROM inserted;
+    
+    INSERT INTO Notifications (user_id, type, source_user_id, post_id)
+    VALUES (@followedUserId, 'follow', @followerUserId, NULL);
+END;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//OLDER VERSION
+
+
+
+
+
+
+
+
 
 --Trigger on likes to notifications
 CREATE TRIGGER trg_InsertLikeNotification
@@ -11,9 +88,11 @@ BEGIN
     FROM inserted;
     
     SET @notification_type = 'Like';
-    
-    INSERT INTO Notification (user_id, notification_type, related_id, timestamp)
-    VALUES (@user_id, @notification_type, @post_id, @timestamp);
+    SET @details = 'You have received a new like';
+
+
+    INSERT INTO Notification (user_id, notification_type, related_id, timestamp,details)
+    VALUES (@user_id, @notification_type, @post_id, @timestamp,@details);
 END;
 
 --Trigger for Reactions on Comments
@@ -36,23 +115,8 @@ select * from Notification
 select * from PostLike
 select * from CommentReaction_New
 
---Trigger after a comment is inserted
-CREATE TRIGGER trg_InsertCommentNotification
-ON Comment
-AFTER INSERT
-AS
-BEGIN
-    DECLARE @user_id INT, @post_id INT, @notification_type VARCHAR(50), @timestamp DATETIME;
-    
-    SELECT @user_id = user_id, @post_id = post_id, @timestamp = timestamp
-    FROM inserted;
-    
-    SET @notification_type = 'New Comment';
-    
-    INSERT INTO Notification (user_id, notification_type, related_id, timestamp)
-    VALUES (@user_id, @notification_type, @post_id, @timestamp);
-END;
-select * from notification
+
+
 CREATE TRIGGER trg_InsertFollower
 ON Followers
 AFTER INSERT
@@ -64,9 +128,10 @@ BEGIN
     FROM inserted;
     
     SET @notification_type = 'Follow';
-    
-    INSERT INTO Notification (user_id, notification_type, related_id, timestamp)
-    VALUES (@user_id, @notification_type, @follower_id, @timestamp);
+    SET @details = 'Someone has followed you'
+
+    INSERT INTO Notification (user_id, notification_type, related_id, timestamp,details)
+    VALUES (@user_id, @notification_type, @follower_id, @timestamp,@details);
 END;
 select * from followers
 

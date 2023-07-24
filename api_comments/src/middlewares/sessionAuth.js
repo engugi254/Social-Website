@@ -7,10 +7,7 @@ async function sessionAuth(req, res, next) {
     const redisClient = createClient();
     redisClient.connect();
     console.log("Connected to Redis")
-    const redisStore = new RedisStore({
-      client: redisClient,
-      prefix: ''
-    });
+   
 
     let cookie = req.headers['cookie']
     console.log(cookie)

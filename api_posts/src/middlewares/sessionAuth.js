@@ -1,22 +1,21 @@
 const { createClient } = require('redis');
-const RedisStore = require("connect-redis").default;
+
 
 async function sessionAuth(req, res, next) {
 
+  
   try {
     const redisClient = createClient();
     redisClient.connect();
     console.log("Connected to Redis")
-    const redisStore = new RedisStore({
-      client: redisClient,
-      prefix: ''
-    });
+  
 
     let cookie = req.headers['cookie']
     console.log(cookie)
     let sessionID = cookie.substring(16, 52)
     let session = await redisClient.get(sessionID)
     console.log(session)
+    console.log(req.session)
     if(session == null){
       res.status(401).send("You are not logged in yet");
     } else{

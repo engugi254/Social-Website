@@ -1,0 +1,65 @@
+.notification-container {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.notification-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.notification-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex; /* Add flex display for the content alignment */
+  justify-content: space-between; /* Align content to the left and button to the right */
+}
+
+.notification-content {
+  flex: 1; /* Make the content area flexible to take up available space */
+  border-right: 1px solid #ccc; /* Add right border to the content area */
+  padding-right: 10px; /* Add padding to separate content from the border */
+}
+
+.notification-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.notification-description {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.mark-as-read-btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-left: 1px solid #ccc; /* Add left border to the button */
+}
+.notification-item {
+  /* Other styles as before... */
+
+  /* Default styles for unread notifications */
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.notification-item.unread {
+  /* Styles for unread notifications (not marked as read) */
+  opacity: 1;
+}
+
+.notification-item.read {
+  /* Styles for read notifications (marked as read) */
+  opacity: 0.6; /* You can adjust the opacity value as desired */
+}
+
+
+/* Add hover effect for the button */
+.mark-as-read-btn:hover {
+  background-color: #0056b3;
+}

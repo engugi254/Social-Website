@@ -1,0 +1,43 @@
+/* Comment.css */
+.comments-section {
+    text-align: left;
+    margin: 20px 0;
+  }
+  
+  .comments-heading {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .comment-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .comment-item {
+    margin-bottom: 10px;
+  }
+  
+  .comment-content {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .comment-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+  
+  .comment-submit-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  

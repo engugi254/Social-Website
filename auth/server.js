@@ -12,7 +12,12 @@ const authorize = require("./src/middlewares/session")
 const cors = require('cors')
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+app.use(cors({
+  origin:'http://localhost:5173',
+  credentials:true,
+  optionsSuccessStatus:200
+}));
 
 const pool  = new sql.ConnectionPool(config)
 async function startApp() {
@@ -37,7 +42,7 @@ app.use(
     secret: process.env.SECRET,
     saveUninitialized: true,
     genid: () => v4(),
-    resave: true,
+    resave: false,
     rolling: true,
     unset: 'destroy',
     cookie: {

@@ -7,6 +7,18 @@ CREATE TABLE Users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL 
 );
+CREATE TABLE Profile (
+    profile_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT FOREIGN KEY REFERENCES Users(user_id) UNIQUE,
+    profile_pic_url VARCHAR(MAX) DEFAULT 'https://res.cloudinary.com/dj9ckjrdd/image/upload/v1689842864/hfgx8obodgd3uc7xxazj.jpg',
+    cover_pic_url VARCHAR(MAX) DEFAULT 'https://res.cloudinary.com/dj9ckjrdd/image/upload/v1689842274/z1yqrl0home5kljxg0io.jpg',
+    contact_no VARCHAR(20),
+    address VARCHAR(255),
+    bio VARCHAR(MAX),
+    relationship_status VARCHAR(50),
+    gender CHAR(1),
+    isDeleted BIT DEFAULT 0
+);
 CREATE TABLE Post (
     post_id INT IDENTITY(1,1) PRIMARY KEY,
     user_id INT NOT NULL,
@@ -84,17 +96,6 @@ CREATE TABLE CommentReaction_New (
     CONSTRAINT FK_CommentReaction_New_User FOREIGN KEY (user_id) REFERENCES Users (user_id)
 );
 
-CREATE TABLE user_details (
-    profile_id INT PRIMARY KEY,
-    user_id INT FOREIGN KEY REFERENCES Users(user_id),
-    profile_pic_url VARCHAR(255),
-    cover_pic_url VARCHAR(255),
-    contact_no VARCHAR(20),
-    address VARCHAR(255),
-    bio VARCHAR(MAX),
-    relationship_status VARCHAR(50),
-    gender CHAR(1)
-);
 Drop Table Profile
 
 SELECT * FROM PostLike

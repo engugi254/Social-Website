@@ -60,9 +60,12 @@ module.exports = {
                     req.session.userId = user.user_id; 
                     req.session.authorized = true;
                 }
-                    console.log(passwords_match);
+                    
    
-                    passwords_match?res.json({success:true, message:"logged in successfully"}):
+                    passwords_match?res.json({success:true,
+                         message:"logged in successfully",
+                         userId:user.user_id
+                        }):
                     res.status(401).json({success:false, message:"wrong credentials"})
                 }
                 else{
@@ -121,10 +124,9 @@ module.exports = {
 
         if(pool.connected){
             let results = await pool.request()
-            .input("profile_id",user.profile_id)
                                 .input("user_id",user.user_id)
-                                .input("profile_pic_url",user.profile_pic)
-                                .input("cover_pic_url",user.cover_pic)
+                                .input("profile_pic_url",user.profile_pic_url)
+                                .input("cover_pic_url",user.cover_pic_url)
                                 .input("contact_no",user.contact_no)
                                 .input("address",user.address)
                                 .input("bio",user.bio)
@@ -141,6 +143,67 @@ module.exports = {
         res.send(error.message)
     }
 },
+
+updateProfile: async(req, res)=> {
+    try {
+        const user = req.body;
+        const pool = req.pool;
+
+        if (pool.connected) {
+            const result = await pool.request()
+            .input("user_id",user.user_id)
+
+            .input("contact_no",user.contact_no)
+            .input("address",user.address)
+            .input("bio",user.bio)
+            .input("relationship_status",user.relationship_status)
+            .input("gender",user.gender)
+            .execute("dbo.updateProfile")
+
+            // Check if any rows were affected by the deletion
+            if (result.rowsAffected[0] > 0) {
+                res.json({
+                    success: true,
+                    message: "Profile updated successfully",
+                    userId: req.session.userId
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: "Error updating Profile",
+                });
+            }
+        } else {
+            throw new Error("Internal Error");
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to update Profile",
+            error: error.message,
+        });
+    }
+},
+getProfile:async(req,res)=>{
+    let {user_id} = req.params;
+
+    let pool = req.pool;
+    if(pool.connected){
+        let results = await pool.request()
+        .input("user_id",user_id)
+        .execute('dbo.GetCombinedData');
+        let posts = results.recordset[0];
+        res.json({
+            success:true,
+            message:"Getting profile successfully",
+            results:posts
+        })
+    }else{
+        res.status(500).send("Internal server error")
+    }
+},
+
 showFollowers:async(req,res)=>{
     let {id} = req.params;
 
@@ -156,6 +219,43 @@ showFollowers:async(req,res)=>{
     }else{
         res.status(500).send("Internal server error")
     }
-}
+},
+showUsers:async(req,res)=>{
+
+    let pool = req.pool;
+    if(pool.connected){
+        let results = await pool.query(`SELECT username FROM users`);
+        let posts = results.recordset;
+        res.json({
+            success:true,
+            message:"Getting user successfully",
+            results:posts
+        })
+    }else{
+        res.status(500).send("Internal server error")
+    }
+},
+showUserById: async (req, res) => {
+    const { username } = req.params;
+    let pool = req.pool;
+    if (pool.connected) {
+      try {
+        const query = `SELECT * FROM Users WHERE username = @username`;
+        const result = await pool.request().input('username', username).query(query);
+        const posts = result.recordset;
+        res.json({
+          success: true,
+          message: "Getting user successfully",
+          results: posts
+        });
+      } catch (error) {
+        console.error("Error executing query:", error);
+        res.status(500).send("Internal server error");
+      }
+    } else {
+      res.status(500).send("Internal server error");
+    }
+  }
+  
 
 }
