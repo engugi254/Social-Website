@@ -25,7 +25,7 @@ async function insertLike(req, res) {
       });
   
       // Count the total likes for the post
-      const totalLikes = await pool.query("SELECT COUNT(*) AS count FROM posts WHERE post_id = @post_id AND isLiked = 1", { post_id });
+      const totalLikes = await pool.query("SELECT COUNT(*) AS count FROM PostLikes WHERE post_id = @post_id AND isLiked = 1", { post_id });
   
       res.json({ success: true, totalLikes: totalLikes[0].count });
     } catch (error) {

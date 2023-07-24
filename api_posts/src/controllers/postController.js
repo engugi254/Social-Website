@@ -112,7 +112,28 @@ async function updatePost(req, res) {
 async function getAllPosts(req,res){
     const pool = req.pool
     if(pool.connected){
-        let results = await pool.query(`SELECT * from dbo.Post WHERE isDeleted = 0 ORDER BY timestamp DESC`);
+        let results = await pool.query(`SELECT
+        p.post_id,
+        p.user_id,
+        p.content,
+        p.image,
+        p.timestamp,
+        COUNT(pl.user_id) AS total_likes
+    FROM
+        Post AS p
+    LEFT JOIN
+        PostLike AS pl ON p.post_id = pl.post_id
+        WHERE pl.isDeleted = 0
+
+    GROUP BY
+        p.post_id,
+        p.user_id,
+        p.content,
+        p.image,
+        p.timestamp
+    ORDER BY
+        p.timestamp DESC;
+    `);
         let posts = results.recordset;
         res.json({
             success:true,
@@ -259,17 +280,54 @@ async function likePost(req, res) {
         });
     }
 }
+async function totalLikes(req, res) {
+    try {
+        // Assuming you have a table called "PostLike" with columns "post_id" and "user_id"
+        // and you want to get the total likes count for each post and whether the current user has liked each post
+    
+        // SQL query to get total likes count for each post and whether the current user has liked each post
+        const query = `
+          SELECT
+            post_id,
+            COUNT(*) AS total_likes,
+            CASE WHEN EXISTS (SELECT 1 FROM PostLike WHERE post_id = pl.post_id AND user_id = @user_id) THEN 1 ELSE 0 END AS user_liked
+          FROM
+            PostLike AS pl
+          GROUP BY
+            post_id
+        `;
+    
+        // Assuming you have a pool connection to your database, you can use it to execute the query
+        const pool = req.pool;
+        const result = await pool.request().input("user_id", req.query.user_id).query(query);
+    
+        // Send the response back with the total likes data
+        res.json(result.recordset);
+      } catch (error) {
+        console.error("Error fetching total likes:", error);
+        res.status(500).json({
+          success: false,
+          message: "Failed to fetch total likes",
+          error: error.message,
+        });
+      }
+    };
+   
+    
 
 async function unlikePost(req, res) {
     try {
-        let { user_id, post_id } = req.body;
+        let {  user_id,post_id } = req.body;
         const pool = req.pool;
 
         if (pool.connected) {
             let results = await pool.request()
-                .input("user_id", user_id)
                 .input("post_id", post_id)
-                .execute('dbo.unlikePost');
+                .input("user_id", user_id)
+                
+                .execute('dbo.UnlikePost');
+
+console.log(req.session.userId);
 
             if (results.rowsAffected[0] > 0) {
                 res.json({
@@ -294,6 +352,8 @@ async function unlikePost(req, res) {
         });
     }
 }
+
+
 async function getPostById(req,res){
     let {post_id} = req.params;
 
@@ -466,4 +526,4 @@ async function getPostById(req,res){
   
   // Export the function to be used in your Express route handler
   
-module.exports = {getAllPosts,createPost,deletePost,likePost,unlikePost,getPostById,updatePost,GetProfileContentByUserId,getPostsCommentsReplies,getAllRepliesByCommentId,getCommentsByPost,postComment,postReply}
+module.exports = {getAllPosts,totalLikes,createPost,deletePost,likePost,unlikePost,getPostById,updatePost,GetProfileContentByUserId,getPostsCommentsReplies,getAllRepliesByCommentId,getCommentsByPost,postComment,postReply}

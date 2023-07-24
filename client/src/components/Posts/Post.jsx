@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -20,24 +20,51 @@ const Post = ({ items, userId }) => {
 
   const handleLikeToggle = async (post_id) => {
     try {
-      const response = await axios.post(
-        `http://localhost:6060/posts/${userId}/${post_id}`,
-        { withCredentials: true }
-      );
-      if (response.data.success) {
-        // Update the likes state with the new like count
-        setLikes((prevLikes) => ({
-          ...prevLikes,
-          [post_id]: response.data.totalLikes,
-        }));
-        // Update the userLiked state to reflect the user's like status
-        setUserLiked((prevUserLiked) => ({
-          ...prevUserLiked,
-          [post_id]: !prevUserLiked[post_id],
-        }));
+      // Check if the user already liked the post
+      if (userLiked[post_id]) {
+        // If the user already liked the post, unlike the post
+        const response = await axios.post(
+          "http://localhost:5050/unlike-post",
+          { post_id: post_id, user_id: userId },
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          // If the like is successfully removed, update the likes and userLiked states
+          setLikes((prevLikes) => ({
+            ...prevLikes,
+            [post_id]: prevLikes[post_id] - 1,
+          }));
+          setUserLiked((prevUserLiked) => ({
+            ...prevUserLiked,
+            [post_id]: false,
+          }));
+          // Remove the post_id from localStorage to persist the unlike action across refreshes
+          localStorage.removeItem(`userLiked:${userId}:${post_id}`);
+        }
+      } else {
+        // If the user has not liked the post, like the post
+        const response = await axios.post(
+          "http://localhost:5050/like-post",
+          { user_id: userId, post_id: post_id },
+          { withCredentials: true }
+        );
+        if (response.data.success) {
+          // If the like is successfully added, update the likes and userLiked states
+          setLikes((prevLikes) => ({
+            ...prevLikes,
+            [post_id]: (prevLikes[post_id] || 0) + 1,
+          }));
+          setUserLiked((prevUserLiked) => ({
+            ...prevUserLiked,
+            [post_id]: true,
+          }));
+          // Save the post_id to localStorage to persist the like action across refreshes
+          localStorage.setItem(`userLiked:${userId}:${post_id}`, true);
+        }
       }
     } catch (error) {
-      console.error("Error while liking/unliking post:", error);
+      console.error("Error toggling like:", error);
     }
   };
 
@@ -47,6 +74,38 @@ const Post = ({ items, userId }) => {
       [post_id]: !prevShowComments[post_id], // Toggle the visibility for the specific post_id
     }));
   };
+
+  // Function to fetch the total likes for each post on page load
+  const fetchTotalLikes = async () => {
+    try {
+      const response = await axios.get("http://localhost:5050/total-likes", {
+        withCredentials: true,
+      });
+      const totalLikesData = response.data;
+
+      // Update the likes state with the retrieved total likes
+      const likesData = {};
+      const userLikedData = {};
+
+      totalLikesData.forEach((data) => {
+        likesData[data.post_id] = data.total_likes;
+        // Check if the post_id is saved in localStorage to determine if the user has liked the post
+        userLikedData[data.post_id] =
+          localStorage.getItem(`userLiked:${userId}:${data.post_id}`) ===
+          "true";
+      });
+
+      setLikes(likesData);
+      setUserLiked(userLikedData);
+    } catch (error) {
+      console.error("Error fetching total likes:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch total likes on page load
+    fetchTotalLikes();
+  }, [userId]); // Fetch total likes whenever the userId changes
 
   return (
     <div>
@@ -95,7 +154,7 @@ const Post = ({ items, userId }) => {
                       {likes[item.post_id] || 0}{" "}
                       {/* Display the like count for the post */}
                     </span>
-                    {userLiked[item.post_id] ? "Unlike" : "Like"}{" "}
+                    {userLiked[item.post_id] ? "Unlike" : "Likes"}{" "}
                   </span>
 
                   <span className="share-icon">
@@ -119,5 +178,4 @@ const Post = ({ items, userId }) => {
     </div>
   );
 };
-
 export default Post;
