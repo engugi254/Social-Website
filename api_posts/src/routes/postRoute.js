@@ -1,7 +1,7 @@
 const express = require('express')
 
 const router = express.Router();
-const{ createPost,GetProfileContentByUserId,updatePost,getAllPosts,deletePost,likePost,unlikePost,getPostById, getPostsCommentsReplies } = require('../controllers/postController')
+const{ createPost,getPostsById,GetProfileContentByUserId,updatePost,getAllPosts,deletePost,likePost,unlikePost,getPostById, getPostsCommentsReplies } = require('../controllers/postController')
 const{ getCommentsByPost,totalLikes,postComment,postReply,getAllRepliesByCommentId} = require('../controllers/postController')
 
 
@@ -26,6 +26,8 @@ router.get('/total-likes',totalLikes)
 router.post('/posts/:post_id',updatePost)
 
 router.get('/posts/:id/comments',getCommentsByPost)
+router.get('/postcomments/user',getPostsById)
+
 router.post('/posts/:post_id/comments',postComment)
 router.post('/posts/:post_id/comments/:comment_id',postReply)
 router.get('/posts/:post_id/comments/:comment_id/replies',getAllRepliesByCommentId)

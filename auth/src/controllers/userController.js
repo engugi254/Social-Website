@@ -152,7 +152,8 @@ updateProfile: async(req, res)=> {
         if (pool.connected) {
             const result = await pool.request()
             .input("user_id",user.user_id)
-
+            .input("profile_pic_url",user.profile_pic_url)
+            .input("cover_pic_url",user.cover_pic_url)
             .input("contact_no",user.contact_no)
             .input("address",user.address)
             .input("bio",user.bio)
@@ -185,6 +186,45 @@ updateProfile: async(req, res)=> {
         });
     }
 },
+
+updateProfilePic: async(req, res)=> {
+    try {
+        const user = req.body;
+        const pool = req.pool;
+
+        if (pool.connected) {
+            const result = await pool.request()
+            .input("user_id",user.user_id)
+            .input("profile_pic_url",user.profile_pic_url)
+            
+            .execute("dbo.updateProfile")
+
+            // Check if any rows were affected by the deletion
+            if (result.rowsAffected[0] > 0) {
+                res.json({
+                    success: true,
+                    message: "Profile updated successfully",
+                    userId: req.session.userId
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: "Error updating Profile",
+                });
+            }
+        } else {
+            throw new Error("Internal Error");
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to update Profile",
+            error: error.message,
+        });
+    }
+},
+
 getProfile:async(req,res)=>{
     let {user_id} = req.params;
 
@@ -240,7 +280,9 @@ showUserById: async (req, res) => {
     let pool = req.pool;
     if (pool.connected) {
       try {
-        const query = `SELECT * FROM Users WHERE username = @username`;
+        const query = `SELECT * FROM Users 
+        u INNER JOIN Profile p ON u.user_id = p.user_id
+         WHERE username = @username`;
         const result = await pool.request().input('username', username).query(query);
         const posts = result.recordset;
         res.json({

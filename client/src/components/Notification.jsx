@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import "../styles/Notification.css";
 
 const Notification = ({ userId }) => {
   const [items, setItems] = useState([]);
-  const [items2, setItems2] = useState([]);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -48,10 +48,23 @@ const Notification = ({ userId }) => {
             : item
         )
       );
+
+      // Save the read notification ID to local storage
+      localStorage.setItem(`read_${notificationId}`, "true");
     } catch (error) {
       toast.error("An error occurred: " + error.message);
     }
   };
+
+  useEffect(() => {
+    // Check local storage on component mount to update the read status of notifications
+    const updatedItems = items.map((item) => {
+      const isRead = localStorage.getItem(`read_${item.notification_id}`);
+      return isRead ? { ...item, is_read: true } : item;
+    });
+
+    setItems(updatedItems);
+  }, []); // Add an empty dependency array here to run the effect only once
 
   return (
     <div className="notification-container">
@@ -60,7 +73,7 @@ const Notification = ({ userId }) => {
           <li
             key={notification.notification_id}
             className={`notification-item ${
-              notification.is_read ? "read" : "unread"
+              notification.is_read ? "read faded" : "unread"
             }`}
           >
             <div className="notification-content">

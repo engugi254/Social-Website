@@ -8,15 +8,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import Comment from "./Comments"; // Import the Comment component
-
-const Post = ({ items, userId }) => {
+const MyPost = ({ posts, userId }) => {
+  library.add(faComment, faThumbsUp, faShare);
   const [likes, setLikes] = useState({});
   const [userLiked, setUserLiked] = useState({});
   const [showComments, setShowComments] = useState({}); // State to manage comments toggle
-
-  console.log(userId);
-  library.add(faComment, faThumbsUp, faShare);
 
   const handleLikeToggle = async (post_id) => {
     try {
@@ -109,52 +105,52 @@ const Post = ({ items, userId }) => {
 
   return (
     <div>
-      {items.length === 0 ? ( // Check if there are no items and display "Loading..." if true
+      {posts.length === 0 ? ( // Check if there are no posts and display "Loading..." if true
         <div className="loading-div">Loading...</div>
       ) : (
         <ul className="post-list">
-          {items.map((item) => (
-            <li key={item.post_id} className="post-item">
+          {posts.map((post) => (
+            <li key={post.post_id} className="post-item">
               <div className="user-profile">
                 <img
-                  src={item.user.profile.profile_pic_url}
-                  alt={item.user.profile.profile_pic_url}
+                  src={post.user.profile.profile_pic_url}
+                  alt={post.user.profile.profile_pic_url}
                   className="profile-picture"
                 />
-                <span className="username">{item.user.username}</span>
+                <span className="username">{post.user.username}</span>
               </div>
               <div className="post-content-wrapper">
-                <h3 className="post-content">{item.post_content}</h3>
+                <h3 className="post-content">{post.post_content}</h3>
                 <img
-                  src={item.post_image}
-                  alt={item.post_image}
+                  src={post.post_image}
+                  alt={post.post_image}
                   className="post-image"
                 />
                 <div className="post-icons">
-                  <span className="like-icon">
-                    <FontAwesomeIcon icon="thumbs-up" className="light-icon" />
-                  </span>
-                  <span
-                    className="light-icon-content"
-                    onClick={() => handleLikeToggle(item.post_id)}
-                  >
-                    <span className="like-count">
-                      {likes[item.post_id] || 0}{" "}
-                      {/* Display the like count for the post */}
-                    </span>
-                    {userLiked[item.post_id] ? "Unlike" : "Likes"}{" "}
-                  </span>
-
                   <span className="like-icon">
                     <FontAwesomeIcon icon="comment" className="light-icon" />{" "}
                   </span>
                   <span
                     className="light-icon-content"
-                    onClick={() => handleCommentsToggle(item.post_id)} // Use the local handleCommentsToggle in the Post component
+                    onClick={() => handleCommentsToggle(post.post_id)} // Use the local handleCommentsToggle in the Post component
                   >
-                    {showComments[item.post_id]
+                    {showComments[post.post_id]
                       ? "Hide Comments"
                       : "Show Comments"}
+                  </span>
+
+                  <span className="like-icon">
+                    <FontAwesomeIcon icon="thumbs-up" className="light-icon" />
+                  </span>
+                  <span
+                    className="light-icon-content"
+                    onClick={() => handleLikeToggle(post.post_id)}
+                  >
+                    <span className="like-count">
+                      {likes[post.post_id] || 0}{" "}
+                      {/* Display the like count for the post */}
+                    </span>
+                    {userLiked[post.post_id] ? "Unlike" : "Likes"}{" "}
                   </span>
 
                   <span className="share-icon">
@@ -162,13 +158,7 @@ const Post = ({ items, userId }) => {
                   </span>
                   <span className="light-icon-content">Share</span>
                 </div>
-              </div>
-              <Comment
-                items={items}
-                post_id={item.post_id}
-                showComments={showComments}
-                userId={userId}
-              />{" "}
+              </div>{" "}
               {/* Pass the userId as a prop */}
               {/* Pass the showComments for the specific post as a prop */}
             </li>
@@ -178,4 +168,5 @@ const Post = ({ items, userId }) => {
     </div>
   );
 };
-export default Post;
+
+export default MyPost;

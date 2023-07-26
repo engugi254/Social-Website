@@ -54,21 +54,22 @@ const Share = ({ id }) => {
   return (
     <div className="post-container">
       <form className="post-form" onSubmit={handleImageUpload}>
-        <textarea
-          className="post-textarea"
-          placeholder="What's on your mind?"
-          value={content}
-          onChange={handleContentChange}
-        />
+        <span className="sharePost">
+          <textarea
+            className="post-textarea"
+            placeholder="What's on your mind?"
+            value={content}
+            onChange={handleContentChange}
+          />
+          <button className="post-submit-btn" type="submit">
+            Share
+          </button>
+        </span>
         <input
           className="post-file-input"
           type="file"
           onChange={(e) => setImage(e.target.files[0])}
         />
-
-        <button className="post-submit-btn" type="submit">
-          Share
-        </button>
       </form>
 
       {imageUrl && (

@@ -3,39 +3,7 @@ const config = require('../config/config')
 
 
 
-async function insertLike(req, res) {
-    const { user_id, post_id } = req.params;
 
-  let pool = req.pool;
-  if(pool.connected){
-    try{
-    const existingLike = await pool.query(
-        "SELECT isLiked FROM PostLike WHERE post_id = @post_id AND user_id = @user_id",
-        { post_id, user_id }
-      );
-  
-      // Determine the new value of isLiked (toggle the value)
-      const newIsLiked = existingLike[0]?.isLiked === 1 ? 0 : 1;
-  
-      // Update the isLiked column in the database
-      await pool.query("UPDATE PostLike SET isLiked = @newIsLiked WHERE post_id = @post_id AND user_id = @user_id", {
-        post_id,
-        user_id,
-        newIsLiked,
-      });
-  
-      // Count the total likes for the post
-      const totalLikes = await pool.query("SELECT COUNT(*) AS count FROM PostLikes WHERE post_id = @post_id AND isLiked = 1", { post_id });
-  
-      res.json({ success: true, totalLikes: totalLikes[0].count });
-    } catch (error) {
-      console.error("Error while liking/unliking post:", error);
-      res.status(500).json({ error: "An error occurred while liking/unliking post." });
-    }
-
-
-}
-}
 
 async function getAllNotifications(req,res){
     const{id} = req.params;
@@ -49,7 +17,7 @@ async function getAllNotifications(req,res){
         n.type,
         n.timestamp,
         u.username AS sender_username
-      FROM Notifications AS n
+      FROM Notification AS n
       JOIN Users AS u ON n.source_user_id = u.user_id
       WHERE n.user_id = ${id}
       ORDER BY n.timestamp DESC;`);
@@ -64,14 +32,14 @@ async function getAllNotifications(req,res){
     }
 }
 async function getFollowerCount(req, res) {
-    const { id } = req.params;
+    const { userID } = req.params;
   
     let pool = req.pool;
     if (pool.connected) {
       try {
-        let results = await pool.query(
-          `SELECT COUNT(FollowerID) as followerCount FROM dbo.Followers WHERE user_id = ${id}`
-        );
+        let results = await pool.request()
+        .input('userID',userID)
+        .execute('dbo.GetFollowersCount')
         let followerCount = results.recordset[0]?.followerCount || 0;
         res.json({
           success: true,
@@ -88,14 +56,15 @@ async function getFollowerCount(req, res) {
   }
   
 async function getFollowingCount(req, res) {
-    const { id } = req.params;
+    const { userID } = req.params;
   
     let pool = req.pool;
     if (pool.connected) {
       try {
-        let results = await pool.query(
-          `SELECT COUNT(FollowingID) as followingCount FROM dbo.Following WHERE user_id = ${id}`
-        );
+        let results = await pool.request()
+        .input('userID',userID)
+        .execute('dbo.GetFollowingCount')
+        
         let followingCount = results.recordset[0]?.followingCount || 0;
         res.json({
           success: true,
@@ -150,6 +119,28 @@ async function getUserById(req,res){
     res.status(500).send("Internal server error");
   }
 }
+async function getAllUsers(req,res){
+
+  let pool = req.pool;
+  if (pool.connected) {
+    try {
+      const query = `SELECT p.user_id,username FROM Users u
+      INNER JOIN Profile p ON u.user_id = p.user_id; `;
+      const result = await pool.query(query);
+      const posts = result.recordset;
+      res.json({
+        success: true,
+        message: "Getting users successfully",
+        results: posts
+      });
+    } catch (error) {
+      console.error("Error executing query:", error);
+      res.status(500).send("Internal server error");
+    }
+  } else {
+    res.status(500).send("Internal server error");
+  }
+}
 
 async function markAsRead(req, res) {
     const { notificationId } = req.params;
@@ -181,8 +172,30 @@ async function markAsRead(req, res) {
     }
   }
   
+  
+  async function apiFollow(req, res) {
+const pool = req.pool  
+    const {  userID } = req.body;
+const followerUserID = req.session.userId
+  try {
+    // Insert the follow action into the Follower table
+    const query = `
+      INSERT INTO Follower (UserID, FollowerUserID, FollowDate)
+      VALUES (${userID}, ${followerUserID}, GETDATE());
+    `;
+
+    await pool.query(query);
+    console.log("User followed successfully");
+    res.json({ success: true, message: "User followed successfully" });
+  } catch (err) {
+    console.error("Error following user:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+  
+  
 
 
 
-
-module.exports = {getFollowerCount,getUserById,getFollowingCount,insertLike,getAllNotifications,getUnReadNotifications,markAsRead}
+module.exports = {getAllUsers,apiFollow,getFollowerCount,getUserById,getFollowingCount,getAllNotifications,getUnReadNotifications,markAsRead}

@@ -75,7 +75,7 @@ const Comment = ({ post_id, showComments, userId, items }) => {
               replies: [...comment.replies, newReply],
             };
           }
-          return comment;
+          return comment.reverse;
         });
 
         setComments(updatedComments);
@@ -95,7 +95,7 @@ const Comment = ({ post_id, showComments, userId, items }) => {
   return (
     <div>
       {showComments[post_id] && (
-        <div>
+        <div className="comment-div">
           {/* Comment form for the post */}
           <form
             onSubmit={(e) => {
@@ -110,7 +110,9 @@ const Comment = ({ post_id, showComments, userId, items }) => {
               name="commentContent"
               placeholder="Add a comment..."
             />
-            <button type="submit">Comment</button>
+            <button className="comment-btn" type="submit">
+              Comment
+            </button>
           </form>
 
           <h4>Comments:</h4>
@@ -118,16 +120,24 @@ const Comment = ({ post_id, showComments, userId, items }) => {
             {comments.map((comment) => (
               <li key={comment.comment_id}>
                 <div>
-                  <span>{comment.user.username}</span>
-                  <p>{comment.comment_content}</p>
+                  <span className="content-space">
+                    <strong>{comment.user.username}</strong>
+                  </span>
+                  <p>
+                    <span>{comment.comment_content}</span>
+                  </p>
                 </div>
                 {comment.replies.length > 0 && (
                   <ul>
                     {comment.replies.map((reply) => (
                       <li key={reply.reply_id}>
-                        <div>
-                          <span>{reply.user.username}</span>
-                          <p>{reply.reply_content}</p>
+                        <div className="reply-content">
+                          <span className="content-space">
+                            <strong>{reply.user.username}</strong>
+                          </span>
+                          <p>
+                            <span>{reply.reply_content}</span>
+                          </p>
                         </div>
                       </li>
                     ))}
@@ -135,6 +145,7 @@ const Comment = ({ post_id, showComments, userId, items }) => {
                 )}
                 {/* Reply form for each comment */}
                 <form
+                  className="reply-form"
                   onSubmit={(e) => {
                     e.preventDefault();
                     const replyContent = e.target.elements.replyContent.value;
@@ -147,7 +158,9 @@ const Comment = ({ post_id, showComments, userId, items }) => {
                     name="replyContent"
                     placeholder="Add a reply..."
                   />
-                  <button type="submit">Reply</button>
+                  <button className="reply-btn" type="submit">
+                    Reply
+                  </button>
                 </form>
               </li>
             ))}

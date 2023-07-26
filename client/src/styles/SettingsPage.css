@@ -10,9 +10,10 @@
   }
   
   .formGroup {
-    display: grid;
-    grid-template-columns: 100px 1fr;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
   }
   
   .update-details{
@@ -25,7 +26,9 @@
   input[type="text"],
   textarea,
   select {
-    width: 90%;
+    max-width: 600px;
+    width:30em;
+    margin-top:1em;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -34,18 +37,30 @@
   button {
     margin-top: 20px;
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #327ecf !important;
     color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
-  
-  button:hover {
-    background-color: #0056b3;
+  .delete-button{
+    color:rgb(244, 241, 241);
+    background-color: rgb(244, 76, 76) !important;   
   }
-  
+  .deleteDiv{
+    border-radius: 0.5em;
+    border:1px solid rgb(205, 201, 201);
+    padding:0.5em;
+    margin:1em;
+  }
+  button:hover {
+    background-color: #0056b3!important;
+  }
+  .delete-button:hover{
+    color:rgb(244, 241, 241);
+    background-color: rgb(232, 43, 43) !important;   
+  }
   /* Responsive styles */
   @media screen and (max-width: 768px) {
     .formGroup {

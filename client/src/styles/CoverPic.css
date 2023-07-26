@@ -1,0 +1,7 @@
+.uploadForm{
+    position: absolute;
+    bottom: -1px; 
+    left: 90%;
+    transform: translateX(-50%);
+    z-index: 1; 
+}

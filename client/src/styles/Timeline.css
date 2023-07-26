@@ -24,13 +24,20 @@
   }
   
   .post-textarea {
-    width: 100%;
-    padding: 0.5em;
+    width: 30em;
+    padding-left: 0.5em;
+    margin-left: 2em;
     font-size: 1em;
     border-radius: 8px;
     border: 1px solid #ddd;
-    margin-bottom: 1em;
     resize: vertical;
+    margin-bottom: 1em;
+
+  }
+  .sharePost{
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   .post-file-input {
@@ -42,11 +49,13 @@
     justify-content: center;
     align-items: center;
   }
-  
+  .comment-div{
+    text-align: left;
+  }
   .post-submit-btn {
     align-self: flex-end;
-
-    background-color: rgb(139, 143, 172);
+margin:2em;
+    background-color: rgb(97, 116, 255);
     color: #fff;
     padding: 10px 20px;
     border: none;
@@ -54,10 +63,19 @@
     transition: background-color 0.2s ease;
     border-radius: 8px;
   }
-  
-  .post-submit-button:hover {
-    background-color: #a0a4b7; 
+  .reply-form,.reply-conten{
+    margin-left:4em;
   }
+  .comment-btn,.reply-btn{
+    background-color: rgb(155, 165, 235);
+
+  }
+
+  .comment-btn:hover,.reply-btn:hover{
+    background-color: rgb(124, 139, 236);
+
+  }
+  
   .post-submit-btn:hover {
     background-color: #0056b3;
   }

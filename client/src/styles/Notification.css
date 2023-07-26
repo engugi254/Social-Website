@@ -57,6 +57,37 @@
   /* Styles for read notifications (marked as read) */
   opacity: 0.6; /* You can adjust the opacity value as desired */
 }
+.notification-list {
+  list-style: none;
+  padding: 0;
+}
+
+.notification-item {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  transition: opacity 0.3s ease; /* Add a smooth fade transition */
+}
+
+li.notification-item.read.faded{
+  opacity: 0.6; /* Reduce the opacity for read notifications */
+  color:gray;
+}
+
+.mark-as-read-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mark-as-read-btn:hover {
+  background-color: #0056b3;
+}
+
 
 
 /* Add hover effect for the button */

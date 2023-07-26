@@ -13,6 +13,8 @@ const Settings = ({ userId }) => {
     gender: "",
   });
 
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -38,12 +40,32 @@ const Settings = ({ userId }) => {
       toast.error("An error occurred: " + error.message);
     }
   };
+
+  const handleDeleteAccount = async () => {
+    try {
+      // Make API call to delete the account using the user_id or any other identifier
+      const response = await axios.delete(
+        `http://localhost:4040/users/delete_account/${userId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      toast.success("Account deleted successfully!");
+      console.log(response.data.results); // This could be a success message or any other response from the backend
+      // Optionally, you can perform any cleanup actions or redirect the user after successful deletion
+    } catch (error) {
+      toast.error(
+        "An error occurred while deleting the account: " + error.message
+      );
+    }
+  };
+
   return (
     <div className={styles.formContainer}>
       <h3 className="update-details">Update Your Details:</h3>
       <br></br>
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
+        <div className="formGroup">
           <label htmlFor="contact_no">Contact Number</label>
           <input
             type="text"
@@ -54,7 +76,7 @@ const Settings = ({ userId }) => {
             required
           />
         </div>
-        <div className={styles.formGroup}>
+        <div className="formGroup">
           <label htmlFor="address">Address</label>
           <input
             type="text"
@@ -65,7 +87,7 @@ const Settings = ({ userId }) => {
             required
           />
         </div>
-        <div className={styles.formGroup}>
+        <div className="formGroup">
           <label htmlFor="bio">Bio</label>
           <textarea
             id="bio"
@@ -75,7 +97,7 @@ const Settings = ({ userId }) => {
             required
           />
         </div>
-        <div className={styles.formGroup}>
+        <div className="formGroup">
           <label htmlFor="relationship_status">Relationship Status</label>
           <input
             type="text"
@@ -86,7 +108,7 @@ const Settings = ({ userId }) => {
             required
           />
         </div>
-        <div className={styles.formGroup}>
+        <div className="formGroup">
           <label htmlFor="gender">Gender</label>
           <select
             id="gender"
@@ -101,9 +123,34 @@ const Settings = ({ userId }) => {
             <option value="O">Other</option>
           </select>
         </div>
-        <button type="submit">Submit</button>
+        <p>
+          <button type="submit">Submit</button>
+        </p>
+        <div className="deleteDiv">
+          <h3>Delete Account: </h3>
+          <button
+            type="button"
+            className="delete-button"
+            onClick={() => setShowDeleteConfirmation(true)}
+          >
+            Delete Account
+          </button>
+        </div>
       </form>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <div className="delete-confirmation">
+          <p>Are you sure you want to delete your account?</p>
+          <button onClick={handleDeleteAccount}>Yes</button>
+          <br />
+          <button onClick={() => setShowDeleteConfirmation(false)}>
+            Cancel
+          </button>
+        </div>
+      )}
     </div>
   );
 };
+
 export default Settings;

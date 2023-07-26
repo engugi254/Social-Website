@@ -4,10 +4,12 @@ import { Image } from "cloudinary-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
+import "../styles/CoverPic.css";
 
-function Verified({ userId }) {
+function CoverPic({ userId }) {
   const [image, setImage] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [iconClicked, setIconClicked] = useState(false); // Track if the icon is clicked
 
   const handleImageUpload = async (e) => {
     e.preventDefault();
@@ -30,6 +32,11 @@ function Verified({ userId }) {
     }
   };
 
+  const handleIconClick = () => {
+    // When the icon is clicked, set the iconClicked state to true
+    setIconClicked(true);
+  };
+
   const handleSaveImage = async (e) => {
     e.preventDefault();
 
@@ -38,7 +45,7 @@ function Verified({ userId }) {
         "http://localhost:4040/users/update_profile",
         {
           user_id: userId,
-          profile_pic_url: imageUrl.toString(),
+          cover_pic_url: imageUrl.toString(),
         },
         { withCredentials: true }
       );
@@ -52,20 +59,26 @@ function Verified({ userId }) {
   };
 
   return (
-    <div>
-      <form onSubmit={handleImageUpload}>
-        {/* Replace the input file with a clickable icon */}
-        <label htmlFor="imageInput">
+    <div className="uploadForm">
+      {/* Render the label and icon */}
+      <label htmlFor="imageInput">
+        <div className="uploadIcon" onClick={handleIconClick}>
           <FontAwesomeIcon icon={faUpload} size="2x" />
-        </label>
-        <input
-          type="file"
-          id="imageInput"
-          style={{ display: "none" }}
-          onChange={(e) => setImage(e.target.files[0])}
-        />
-        <button type="submit">Upload Image</button>
-      </form>
+        </div>
+      </label>
+
+      {/* Render the file input conditionally based on whether the icon is clicked */}
+      {iconClicked && (
+        <form onSubmit={handleImageUpload}>
+          <input
+            type="file"
+            id="imageInput"
+            style={{ display: "none" }}
+            onChange={(e) => setImage(e.target.files[0])}
+          />
+          <button type="submit">Upload Image</button>
+        </form>
+      )}
 
       {imageUrl && (
         <div>
@@ -77,4 +90,4 @@ function Verified({ userId }) {
   );
 }
 
-export default Verified;
+export default CoverPic;

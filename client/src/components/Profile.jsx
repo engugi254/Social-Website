@@ -1,12 +1,15 @@
 import "../styles/Profile.css";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import CoverPic from "./CoverPic";
+import MyPost from "./MyPost";
 
 const Profile = ({ userId }) => {
   const [items, setItems] = useState([]);
   const [items2, setItems2] = useState([]);
 
   const [items3, setItems3] = useState([]);
+  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -27,7 +30,7 @@ const Profile = ({ userId }) => {
           }
         );
         setItems2(response2.data.followingCount);
-        console.log(response2.data.followingCount);
+        console.log(response2);
         const response = await axios.get(
           `http://localhost:4040/users/profile/${userId}`,
           {
@@ -35,6 +38,16 @@ const Profile = ({ userId }) => {
           }
         );
         setItems(response.data.results);
+        console.log(response.data.results);
+
+        const response4 = await axios.get(
+          `http://localhost:5050/postcomments/user`,
+          {
+            withCredentials: true,
+          }
+        );
+        setPosts(response4.data);
+        console.log(response4.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -58,6 +71,7 @@ const Profile = ({ userId }) => {
             alt="Cover Image"
             className="cover-image"
           />
+          <CoverPic userId={userId} />
           <div className="profile-photo">
             <img
               src={items.profile_pic_url}
@@ -72,17 +86,21 @@ const Profile = ({ userId }) => {
           <span className="first-name">{items.firstname}</span>
           <span className="last-name">{items.lastname}</span>
         </p>
-        <p className="username">{items.username}</p>
+        <p className="username">@{items.username}</p>
       </div>
       <div className="profile-body">
-        <p>
-          <strong>Followers: </strong>
-          {items3}{" "}
-        </p>
-        <p>
-          <strong>Following: </strong>
-          {items2}{" "}
-        </p>
+        <div>
+          <span>
+            <strong>Followers: </strong>
+            {items3}{" "}
+          </span>
+        </div>
+        <div>
+          <span>
+            <strong>Followers: </strong>
+            {items3}{" "}
+          </span>
+        </div>
       </div>
       <div className="profile-bio">
         <h4>About me:</h4>
@@ -91,6 +109,8 @@ const Profile = ({ userId }) => {
         <p>Contact Number: {items ? items.contact_no : "N/A"}</p>
         <p>{items?.bio}</p>
       </div>
+      <h3>My posts</h3>
+      <MyPost posts={posts} userId={userId} />
 
       {/* <p className="p-name">{console.log(items)}</p> */}
     </>
